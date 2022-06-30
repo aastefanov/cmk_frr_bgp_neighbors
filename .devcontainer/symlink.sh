@@ -8,5 +8,9 @@ done;
 rm -rfv $OMD_ROOT/local/lib/check_mk/base/plugins/agent_based
 ln -sv $WORKSPACE/agent_based $OMD_ROOT/local/lib/check_mk/base/plugins/agent_based
 
+
+rm -rfv /usr/lib/check_mk_agent/plugins
+ln -sv $WORKSPACE/agents/linux/plugins /usr/lib/check_mk_agent/plugins
+
 rm -rfv $OMD_ROOT/local/lib/nagios/plugins
 ln -sv $WORKSPACE/nagios_plugins $OMD_ROOT/local/lib/nagios/plugins

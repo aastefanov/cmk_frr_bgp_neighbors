@@ -1,0 +1,12 @@
+---
+- name: Deploy Script
+  hosts: gw
+
+  tasks:
+  - name: Put plugin file
+    ansible.builtin.copy:
+      src: ../agents/linux/plugins/frr_bgp_neighbors
+      dest: /usr/lib/check_mk_agent/plugins/frr_bgp_neighbors
+      owner: root
+      group: root
+      mode: '0755'

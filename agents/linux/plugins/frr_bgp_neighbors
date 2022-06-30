@@ -1,0 +1,5 @@
+#!/bin/sh
+# -*- coding: utf-8 -*-
+
+echo "<<<frr_bgp_summary:sep(0)>>>"
+vtysh -c "show bgp summary json"
