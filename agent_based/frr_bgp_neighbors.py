@@ -22,10 +22,19 @@ def __merge_dicts(x, y):
     return z
 
 def __peers(parsed):
-    return __merge_dicts(
-        parsed['ipv4Unicast']['peers'],
-        parsed['ipv6Unicast']['peers']
-    )
+    if 'ipv4Unicast' in parsed:
+        if 'ipv6Unicast' in parsed:
+            return __merge_dicts(
+                parsed['ipv4Unicast']['peers'],
+                parsed['ipv6Unicast']['peers']
+            )
+
+        return parsed['ipv4Unicast']['peers']
+
+    if 'ipv6Unicast' in parsed:
+        return parsed['ipv6Unicast']['peers']
+
+    return []
 
 
 def parse_frr_neighbors(string_table):
@@ -54,8 +63,13 @@ def check_frr_neighbor(item, section):
         if descr is None:
             descr = item
 
-        sent = int(peers[item]['pfxSnt'])
-        received = int(peers[item]['pfxRcd'])
+        sent = 0
+        received = 0
+        if 'pfxSnt' in peers[item]:
+            sent = int(peers[item]['pfxSnt'])
+
+        if 'pfxRcd' in peers[item]:
+            received = int(peers[item]['pfxRcd'])
 
         yield Metric("prefixes_sent", value = sent)
         yield Metric("prefixes_received", value = int(received))
@@ -66,13 +80,21 @@ def check_frr_neighbor(item, section):
 
 
 def check_bgp_status(section):
-    count4 = int(section['ipv4Unicast']['peerCount'])
-    count6 = int(section['ipv4Unicast']['peerCount'])
+    router_id = ''
+    if 'ipv4Unicast' in section:
+        count4 = int(section['ipv4Unicast']['peerCount'])
+        router_id = section['ipv4Unicast']['routerId']
+        yield Metric("ipv4_peers", value=count4)
+    else:
+        count4 = 0
 
-    yield Metric("ipv4_peers", value=count4)
-    yield Metric("ipv6_peers", value=count6)
+    if 'ipv6Unicast' in section:
+        count6 = int(section['ipv6Unicast']['peerCount'])
+        router_id = section['ipv6Unicast']['routerId']
+        yield Metric("ipv6_peers", value=count6)
+    else:
+        count6 = 0
 
-    router_id = section['ipv4Unicast']['routerId']
 
     yield Result(
         state=__switch_states(count4, count6),
